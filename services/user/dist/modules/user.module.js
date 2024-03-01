@@ -15,11 +15,12 @@ const userRepo_provider_1 = require("../providers/userRepo.provider");
 const profileRepo_provider_1 = require("../providers/profileRepo.provider");
 const assetsRepo_provider_1 = require("../providers/assetsRepo.provider");
 const multer_middleware_1 = require("../common/middlewares/multer.middleware");
+const activityRepo_provider_1 = require("../providers/activityRepo.provider");
 let userModule = class userModule {
     configure(consumer) {
         consumer
             .apply(multer_middleware_1.MulterMiddleware)
-            .forRoutes({ path: 'user/upload/profile_img/:id', method: common_1.RequestMethod.PUT }, { path: 'user/upload/back_img/:id', method: common_1.RequestMethod.PUT });
+            .forRoutes({ path: 'user/upload/profile_img', method: common_1.RequestMethod.PUT }, { path: 'user/upload/back_img', method: common_1.RequestMethod.PUT });
     }
 };
 exports.userModule = userModule;
@@ -31,12 +32,14 @@ exports.userModule = userModule = __decorate([
             ...userRepo_provider_1.UserRepoProvider,
             ...profileRepo_provider_1.ProfileRepoProvider,
             ...assetsRepo_provider_1.AssetsRepoProvider,
+            ...activityRepo_provider_1.ActivityRepoProvider,
             user_service_1.UserService
         ],
         exports: [
             ...userRepo_provider_1.UserRepoProvider,
             ...profileRepo_provider_1.ProfileRepoProvider,
             ...assetsRepo_provider_1.AssetsRepoProvider,
+            ...activityRepo_provider_1.ActivityRepoProvider,
             user_service_1.UserService
         ]
     })

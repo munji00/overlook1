@@ -26,6 +26,10 @@ __decorate([
     __metadata("design:type", Number)
 ], UserActivity.prototype, "fraId", void 0);
 __decorate([
+    (0, typeorm_1.CreateDateColumn)({ type: 'timestamp' }),
+    __metadata("design:type", Date)
+], UserActivity.prototype, "createdAt", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => user_entity_1.default, (user) => user.fri),
     __metadata("design:type", user_entity_1.default)
 ], UserActivity.prototype, "fri", void 0);

@@ -71,7 +71,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], authController.prototype, "signin", null);
 exports.authController = authController = __decorate([
-    (0, common_1.Controller)('auth'),
+    (0, common_1.Controller)('user/auth'),
     __metadata("design:paramtypes", [user_service_1.UserService])
 ], authController);
 //# sourceMappingURL=auth.controller.js.map

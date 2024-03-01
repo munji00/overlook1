@@ -17,10 +17,11 @@ const common_1 = require("@nestjs/common");
 const fs = require("fs");
 const typeorm_1 = require("typeorm");
 let UserService = class UserService {
-    constructor(userRepository, profileRepository, assetsRepository) {
+    constructor(userRepository, profileRepository, assetsRepository, activityRepository) {
         this.userRepository = userRepository;
         this.profileRepository = profileRepository;
         this.assetsRepository = assetsRepository;
+        this.activityRepository = activityRepository;
     }
     async create(userData) {
         const user = this.userRepository.create(userData);
@@ -37,7 +38,10 @@ let UserService = class UserService {
         return this.userRepository.findOne({ where: { userName } });
     }
     async fetchById(id) {
-        return this.userRepository.findOne({ where: { id }, relations: ['profile', 'assets', 'fri', 'fra'] });
+        return this.userRepository.findOne({
+            where: { id },
+            relations: ['profile', 'assets', 'fri', 'fri.fra.assets', 'fra.fri', 'fra', 'fra.fri.assets']
+        });
     }
     async updateProfile(id, userProfile) {
         const profile = await this.profileRepository.findOne({ where: { id } });
@@ -58,6 +62,15 @@ let UserService = class UserService {
         const newAssets = this.assetsRepository.merge(assets, { userBackground: backgroundImgPath });
         return await this.assetsRepository.save(newAssets);
     }
+    async createActivity(activity) {
+        const newActivity = this.activityRepository.create(activity);
+        return await this.activityRepository.save(newActivity);
+    }
+    async updateActivity(id) {
+        const activity = await this.activityRepository.findOne({ where: { id } });
+        activity.isAccepted = true;
+        return await this.activityRepository.save(activity);
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
@@ -65,7 +78,9 @@ exports.UserService = UserService = __decorate([
     __param(0, (0, common_1.Inject)('USER_REPOSITORY')),
     __param(1, (0, common_1.Inject)('PROFILE_REPOSITORY')),
     __param(2, (0, common_1.Inject)('ASSETS_REPOSITORY')),
+    __param(3, (0, common_1.Inject)('ACTIVITY_REPOSITORY')),
     __metadata("design:paramtypes", [typeorm_1.Repository,
+        typeorm_1.Repository,
         typeorm_1.Repository,
         typeorm_1.Repository])
 ], UserService);
