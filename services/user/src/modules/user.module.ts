@@ -6,6 +6,7 @@ import { UserRepoProvider } from '../providers/userRepo.provider';
 import { ProfileRepoProvider } from '../providers/profileRepo.provider';
 import { AssetsRepoProvider } from '../providers/assetsRepo.provider';
 import { MulterMiddleware } from '../common/middlewares/multer.middleware';
+import { ActivityRepoProvider } from '../providers/activityRepo.provider';
 
 @Module({
   imports: [DatabaseModule],
@@ -14,12 +15,14 @@ import { MulterMiddleware } from '../common/middlewares/multer.middleware';
     ...UserRepoProvider,
     ...ProfileRepoProvider,
     ...AssetsRepoProvider,
+    ...ActivityRepoProvider,
     UserService
 ],
   exports:[
     ...UserRepoProvider,
     ...ProfileRepoProvider,
     ...AssetsRepoProvider,
+    ...ActivityRepoProvider,
     UserService
 ]
 })
@@ -28,8 +31,8 @@ export class userModule {
     consumer
       .apply(MulterMiddleware)
       .forRoutes(
-        { path: 'user/upload/profile_img/:id', method: RequestMethod.PUT },
-        { path: 'user/upload/back_img/:id', method: RequestMethod.PUT }
+        { path: 'user/upload/profile_img', method: RequestMethod.PUT },
+        { path: 'user/upload/back_img', method: RequestMethod.PUT }
         );
   }
 }

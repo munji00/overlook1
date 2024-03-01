@@ -4,6 +4,10 @@ import { Repository } from 'typeorm';
 import User from '../database/entities/user.entity';
 import UserProfile from '../database/entities/userProfile.entity';
 import UserAssets from '../database/entities/userAssets.entity';
+import { Iprofile } from '../interfaces/profile.interface';
+import { Iassets } from '../interfaces/assets.interface';
+import UserActivity from '../database/entities/userActivity.entity';
+import { createActivityI, fetchActivityI } from 'src/interfaces/activity.interface';
 
 @Injectable()
 export class UserService{
@@ -11,6 +15,7 @@ export class UserService{
     @Inject('USER_REPOSITORY') private userRepository: Repository<User>,
     @Inject('PROFILE_REPOSITORY') private profileRepository: Repository<UserProfile>,
     @Inject('ASSETS_REPOSITORY') private assetsRepository: Repository<UserAssets>,
+    @Inject('ACTIVITY_REPOSITORY') private activityRepository: Repository<UserActivity>,
   ) {}
 
   async create(userData:User): Promise<User> {
@@ -31,17 +36,21 @@ export class UserService{
   }
 
   async fetchById(id:number): Promise<User> {
-    return this.userRepository.findOne({where:{id} ,relations:['profile', 'assets', 'fri', 'fra']});
+    return this.userRepository.findOne(
+       {
+          where:{id},
+          relations:['profile', 'assets', 'fri','fri.fra.assets', 'fra.fri', 'fra', 'fra.fri.assets']
+       });
 
   }
 
-  async updateProfile(id:number ,userProfile:UserProfile): Promise<UserProfile> {
+  async updateProfile(id:number ,userProfile:Iprofile): Promise<Iprofile> {
     const profile = await this.profileRepository.findOne({where:{id}});
     const newProfile = this.profileRepository.merge(profile, userProfile)
     return await this.profileRepository.save(newProfile)
   }
 
-  async updateProfileImg(id:number ,profileImgPath:string): Promise<UserAssets> {
+  async updateProfileImg(id:number ,profileImgPath:string): Promise<Iassets> {
     const assets = await this.assetsRepository.findOne({where:{id}});
     if (assets.userProfile!=='' && fs.existsSync(`src/uploads/${assets.userProfile}`)) 
        fs.unlinkSync(`src/uploads/${assets.userProfile}`);
@@ -56,4 +65,16 @@ export class UserService{
     const newAssets = this.assetsRepository.merge(assets, {userBackground:backgroundImgPath})
     return await this.assetsRepository.save(newAssets)
   }
+
+  async createActivity(activity:createActivityI): Promise<fetchActivityI> {
+    const newActivity = this.activityRepository.create(activity);
+    return await this.activityRepository.save(newActivity)
+  }
+
+  async updateActivity(id:number): Promise<fetchActivityI> {
+    const activity = await this.activityRepository.findOne({where:{id}});
+    activity.isAccepted = true;
+    return await this.activityRepository.save(activity)
+  }
+
 }
