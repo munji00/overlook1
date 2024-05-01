@@ -15,3 +15,4 @@ export const globalMiddleware = async(req, res, next) => {
         res.status(404).send('Service not found');
     }
 }
+
