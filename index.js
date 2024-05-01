@@ -1,3 +1,4 @@
+
 import express from 'express'
 import httpProxy from 'http-proxy'
 import { globalMiddleware } from './middlewares/globalMiddleware.js';
@@ -8,6 +9,7 @@ const proxy = httpProxy.createProxyServer();
 
 export const services = {
     user: 'http://localhost:3000',
+    post:'http://localhost:3001'
 };
 
 app.use(express.json());
@@ -25,6 +27,7 @@ proxy.on('error', (err, req, res) => {
     res.status(500).send('Proxy Error');
 });
 proxy.on('proxyReq', function(proxyReq, req, res, options) {
+    console.log(req.body)
     if(JSON.stringify(req.body).length > 2){
       let bodyData = JSON.stringify(req.body);
       proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
