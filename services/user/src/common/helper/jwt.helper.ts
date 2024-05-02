@@ -7,8 +7,9 @@ env.config()
 const secretKey =process.env.JWT_SECRET
 
 export const jwtHelper = {
-    async generateToken(data:jwt_payload){
-        return await jwt.sign(data, secretKey)
+    async generateToken(data:any){
+        const{id ,userName, mobileNumber} = data;
+        return await jwt.sign({id, userName, mobileNumber}, secretKey)
     },
 
     async verifyToken(token:string){

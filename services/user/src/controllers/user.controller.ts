@@ -21,7 +21,7 @@ export class userController {
 
 
    @Get('all')
-    async getUsers(@Body() body:any ,@Req() req:any ,@Res() response:Response){
+    async getUsers(@Body() body:any ,@Res() response:Response){
         try{
             const users = await this.userService.fetchAll();
             response.status(200).send({success:true, data:users})
@@ -46,11 +46,11 @@ export class userController {
 
 
     @Put('update')
-    async updateProfile(@Body() body:ProfileDto,@Req() request:Request, @Res() response:Response){
-        const userId = request.headers['user-id']
+    async updateProfile(@Body() body:any,@Req() request:Request, @Res() response:Response){
+        const {user, ...rest} = body
         try{
-            const user = await this.userService.fetchById(+userId);
-            const profile = await this.userService.updateProfile(user.profile.id, body);
+            const userData = await this.userService.fetchById(user.id);
+            const profile = await this.userService.updateProfile(userData.profile.id, rest);
             response.status(200).send({success:true, data:profile})
         }catch(error){
             if(error instanceof HttpException) throw error
@@ -59,15 +59,15 @@ export class userController {
     }
 
     @Put('upload/profile_img')
-    async updateProfileImg(@UploadedFile() file:Express.Multer.File,@Req() req:Request,  @Res() response:Response) {
-        const userId = req.headers['user-id'];
+    async updateProfileImg(@Req() req:any,  @Res() response:Response) {
+        const userId = req.headers['userid'];
         try {
-            const user = await this.userService.fetchById(+userId)
-            await this.userService.updateProfileImg(user.assets.id, file.filename);
+            const userData = await this.userService.fetchById(+userId);
+            await this.userService.updateProfileImg(userData.assets.id, req.file.filename);
             response.status(200).send({success:true, message:"profile image uploaded successfully"})
         } catch (error) {
-            console.log(error)
-            if(error instanceof HttpException) throw error
+            console.log(error.message)
+            if(error instanceof HttpException) throw error.message
             throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

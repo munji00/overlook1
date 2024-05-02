@@ -1,4 +1,4 @@
-import * as amqp from 'amqplib';
+import * as amqp from 'amqplib'
 
 export class RabbitMQClient {
     private connection: amqp.Connection;

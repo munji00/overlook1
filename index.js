@@ -26,15 +26,14 @@ proxy.on('error', (err, req, res) => {
     console.log(err)
     res.status(500).send('Proxy Error');
 });
-proxy.on('proxyReq', function(proxyReq, req, res, options) {
-    console.log(req.body)
-    if(JSON.stringify(req.body).length > 2){
-      let bodyData = JSON.stringify(req.body);
-      proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
-      proxyReq.setHeader('Content-Type', 'application/json');
-      proxyReq.write(bodyData);
-    }
-  });
+// proxy.on('proxyReq', function(proxyReq, req, res, options) {
+//     if(JSON.stringify(req.user).length > 2){
+//       let bodyData = JSON.stringify(req.user);
+//       proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+//       proxyReq.setHeader('Content-Type', 'application/json');
+//       proxyReq.write(bodyData);
+//     }
+//   });
 
 
 const PORT = 3005;
