@@ -1,13 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 import * as fs from 'fs'
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import User from '../database/entities/user.entity';
 import UserProfile from '../database/entities/userProfile.entity';
 import UserAssets from '../database/entities/userAssets.entity';
-import { Iprofile } from '../interfaces/profile.interface';
-import { Iassets } from '../interfaces/assets.interface';
 import UserActivity from '../database/entities/userActivity.entity';
-import { createActivityI, fetchActivityI } from 'src/interfaces/activity.interface';
+import {  CreateUserActivityI} from 'src/interfaces/activity.interface';
+import { UserResponseDto } from 'src/dto/user.dto';
+import { UserProfileResponseDto } from 'src/dto/profile.dto';
+import { UserAssetsResponseDto } from 'src/dto/assets.dto';
+import { UserActivityResponseDto } from 'src/dto/activity.dto';
+import { CreateUserI } from 'src/interfaces/user.interface';
+import { UpdateUserProfileI } from 'src/interfaces/profile.interface';
 
 @Injectable()
 export class UserService{
@@ -18,8 +22,9 @@ export class UserService{
     @Inject('ACTIVITY_REPOSITORY') private activityRepository: Repository<UserActivity>,
   ) {}
 
-  async create(userData:User): Promise<User> {
-    const user =this.userRepository.create(userData);
+  //service to create new user
+  async create(userData:CreateUserI): Promise<UserResponseDto> {
+    const user =this.userRepository.create(userData as DeepPartial<User>);
     const profile = this.profileRepository.create({});
     const assets = this.assetsRepository.create({})
     user.profile = profile;
@@ -27,15 +32,18 @@ export class UserService{
     return this.userRepository.save(user)
   }
 
-  async fetchAll(): Promise<User[]> {
+
+  async fetchAll(): Promise<UserResponseDto[]> {
     return this.userRepository.find();
   }
+  
 
-  async fetchOne(userName:string): Promise<User> {
+  async fetchOne(userName:string): Promise<UserResponseDto> {
     return this.userRepository.findOne({where:{userName}});
   }
+  
 
-  async fetchById(id:number): Promise<User> {
+  async fetchById(id:number): Promise<UserResponseDto> {
     return this.userRepository.findOne(
        {
           where:{id},
@@ -44,13 +52,14 @@ export class UserService{
 
   }
 
-  async updateProfile(id:number ,userProfile:Iprofile): Promise<Iprofile> {
+  async updateProfile(id:number ,userProfile:Partial<UpdateUserProfileI>): Promise<UserProfileResponseDto> {
     const profile = await this.profileRepository.findOne({where:{id}});
     const newProfile = this.profileRepository.merge(profile, userProfile)
     return await this.profileRepository.save(newProfile)
   }
 
-  async updateProfileImg(id:number ,profileImgPath:string): Promise<Iassets> {
+
+  async updateProfileImg(id:number ,profileImgPath:string): Promise<UserAssetsResponseDto> {
     const assets = await this.assetsRepository.findOne({where:{id}});
     if (assets.userProfile!=='' && fs.existsSync(`src/uploads/${assets.userProfile}`)) 
        fs.unlinkSync(`src/uploads/${assets.userProfile}`);
@@ -58,7 +67,8 @@ export class UserService{
     return await this.assetsRepository.save(newAssets)
   }
 
-  async updateBkgdImg(id:number ,backgroundImgPath:string): Promise<UserAssets> {
+
+  async updateBkgdImg(id:number ,backgroundImgPath:string): Promise<UserAssetsResponseDto> {
     const assets = await this.assetsRepository.findOne({where:{id}});
     if (assets.userBackground!=='' && fs.existsSync(`src/uploads/${assets.userBackground}`)) 
        fs.unlinkSync(`src/uploads/${assets.userBackground}`);
@@ -66,15 +76,16 @@ export class UserService{
     return await this.assetsRepository.save(newAssets)
   }
 
-  async createActivity(activity:createActivityI): Promise<fetchActivityI> {
+
+  async createActivity(activity:CreateUserActivityI): Promise<UserActivityResponseDto> {
     const newActivity = this.activityRepository.create(activity);
     return await this.activityRepository.save(newActivity)
   }
 
-  async updateActivity(id:number): Promise<fetchActivityI> {
+
+  async updateActivity(id:number): Promise<UserActivityResponseDto> {
     const activity = await this.activityRepository.findOne({where:{id}});
     activity.isAccepted = true;
     return await this.activityRepository.save(activity)
   }
-
 }

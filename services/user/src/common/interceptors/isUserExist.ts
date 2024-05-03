@@ -3,6 +3,7 @@ import { Observable} from 'rxjs';
 import { UserService } from '../../services/user.service';
 import * as bcrypt from 'bcrypt'
 import { jwtHelper } from '../helper/jwt.helper';
+import * as constants from '../constants'
 
 @Injectable()
 export class ExistenceCheckInterceptor implements NestInterceptor {
@@ -17,22 +18,21 @@ export class ExistenceCheckInterceptor implements NestInterceptor {
 
     if (userExists) {
       if(request.url.includes('signin')) {
-          request.body.userData=userExists
           const isValid = await bcrypt.compare(request.body.password, userExists.password);
           if(!isValid)
-            throw new HttpException('password or username incorrect' , HttpStatus.NON_AUTHORITATIVE_INFORMATION)
+            throw new HttpException(constants.NOT_MATCH , HttpStatus.NON_AUTHORITATIVE_INFORMATION)
           const accessToken =await jwtHelper.generateToken(userExists);
           request.body.user = userExists;
           response.cookie("accessToken", accessToken)
           return next.handle();
       } else {
-          throw new HttpException('user already exist', HttpStatus.BAD_REQUEST);
+          throw new HttpException(constants.USERNAME_TAKEN, HttpStatus.BAD_REQUEST);
       }
     } else {
       if (request.url.includes('signup')) {
         return next.handle();
       } else {
-        throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(constants.NOT_FOUND, HttpStatus.NOT_FOUND);
       }
    }
   }

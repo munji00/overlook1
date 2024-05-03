@@ -21,8 +21,8 @@ export default class User{
       this.password = await bcrypt.hash(this.password, 10);
     }
 
-    @Column()
-    mobileNumber!:number;
+    @Column({type:'bigint'})
+    mobileNumber:number;
     
     @OneToOne(()=> UserProfile, {cascade:true})
     @JoinColumn()

@@ -1,11 +1,10 @@
-export class CreateActivity{
+export class CreateUserActivityDto{
     friId:number;
     fraId:number;
-    createdAt: Date;
     isAccepted:boolean;
 }
 
-export class fetchActivity{
+export class UserActivityResponseDto{
     id:number;
     friId:number;
     fraId:number;

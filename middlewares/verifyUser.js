@@ -10,7 +10,7 @@ export const verifyUser = async(req, res, next) => {
     if(!token) return res.status(401).send({message:"unauthorized or empty token"})
     try {
         const {id, userName, mobileNumber }= await  jwt.verify(token , secret)
-        req.headers['userId'] = id
+        req.headers['user-id'] = id
         // req.user = {id, userName, mobileNumber };
         next();
     } catch (error) {

@@ -9,11 +9,16 @@ import {
      Post,
      Param,
      Put,
-     UploadedFile
+     UploadedFile,
+     ParseIntPipe
     } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { Response, Express, Request } from 'express';
-import { ProfileDto } from '../dto/profile.dto';
+import { Response, Request } from 'express';
+import {UpdateUserProfileDto } from '../dto/profile.dto';
+import * as constants from '../common/constants'
+import { Express } from 'express';
+import { plainToClass } from 'class-transformer';
+import { UserResponseDto } from 'src/dto/user.dto';
 
 @Controller('user')
 export class userController {
@@ -21,10 +26,10 @@ export class userController {
 
 
    @Get('all')
-    async getUsers(@Body() body:any ,@Res() response:Response){
+    async getUsers(@Res() response:Response){
         try{
             const users = await this.userService.fetchAll();
-            response.status(200).send({success:true, data:users})
+            response.status(200).send({success:true, data:plainToClass(UserResponseDto, users)})
         }catch(error){
           if(error instanceof HttpException) throw error;
           throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -33,11 +38,11 @@ export class userController {
 
 
     @Get('get/:id')
-    async getUser(@Body() body:any ,@Param() params:{id:string}, @Res() response:Response){
-        const {id} = params;
+    async getUser(@Param('id', ParseIntPipe) userId:number, @Res() response:Response){
+        console.log(userId)
         try{
-            const user = await this.userService.fetchById(+id);
-            response.status(200).send({success:true, data:user})
+            const user = await this.userService.fetchById(userId);
+            response.status(200).send({success:true, data:plainToClass(UserResponseDto, user)})
         }catch(error){
             if(error instanceof HttpException) throw error
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -46,11 +51,11 @@ export class userController {
 
 
     @Put('update')
-    async updateProfile(@Body() body:any,@Req() request:Request, @Res() response:Response){
-        const {user, ...rest} = body
+    async updateProfile(@Body() body:Partial<UpdateUserProfileDto>,@Req() request:Request, @Res() response:Response){
+        const id = request.headers['user-id']
         try{
-            const userData = await this.userService.fetchById(user.id);
-            const profile = await this.userService.updateProfile(userData.profile.id, rest);
+            const userData = await this.userService.fetchById(+id);
+            const profile = await this.userService.updateProfile(userData.profile.id, body)
             response.status(200).send({success:true, data:profile})
         }catch(error){
             if(error instanceof HttpException) throw error
@@ -59,26 +64,25 @@ export class userController {
     }
 
     @Put('upload/profile_img')
-    async updateProfileImg(@Req() req:any,  @Res() response:Response) {
-        const userId = req.headers['userid'];
+    async updateProfileImg(@Req() req:Request,  @Res() response:Response) {
+        const userId = req.headers['user-id'];
         try {
             const userData = await this.userService.fetchById(+userId);
             await this.userService.updateProfileImg(userData.assets.id, req.file.filename);
-            response.status(200).send({success:true, message:"profile image uploaded successfully"})
+            response.status(200).send({success:true, message:constants.PROF_IMG_UPLOADED})
         } catch (error) {
-            console.log(error.message)
             if(error instanceof HttpException) throw error.message
             throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @Put('upload/back_img')
-    async updateBkrdImg(@UploadedFile() file:any,@Req() req:Request,  @Res() response:Response) {
+    async updateBkrdImg(@UploadedFile() file:Express.Multer.File,@Req() req:Request,  @Res() response:Response) {
         const userId = req.headers['user-id'];
         try {
             const user = await this.userService.fetchById(+userId)
             await this.userService.updateBkgdImg(user.assets.id, file.filename);
-            response.status(200).send({success:true,message:"background image uploaded successfully"})
+            response.status(200).send({success:true,message:constants.BKGD_IMG_UPLOADED})
         } catch (error) {
             if(error instanceof HttpException) throw error
             throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -86,12 +90,11 @@ export class userController {
     }
 
     @Post('request/send/:id')
-    async sendFrndRqst(@Param() params:{id:string},@Req() req:Request, @Res() response:Response) {
+    async sendFrndRqst(@Param('id' , ParseIntPipe) fraId:number,@Req() req:Request, @Res() response:Response) {
         const userId = req.headers['user-id'];
-        const {id} = params;
         try {
-            await this.userService.createActivity({friId:+userId, fraId:+id, isAccepted:false, createdAt:new Date()});
-            response.status(200).send({success:true,message:"Freind request have send successfully"})
+            await this.userService.createActivity({friId:+userId, fraId, isAccepted:false});
+            response.status(200).send({success:true,message:constants.FRND_REQUEST_SENT})
         } catch (error) {
             if(error instanceof HttpException) throw error
             throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -99,11 +102,10 @@ export class userController {
     }
 
     @Put('request/accept/:id')
-    async acceptFrndRqst(@Param() params:{id:string}, @Res() response:Response) {
-        const {id} = params;
+    async acceptFrndRqst(@Param('id' , ParseIntPipe) activitId:number, @Res() response:Response) {
         try {
-            await this.userService.updateActivity(+id);
-            response.status(200).send({success:true,message:"Freind request accepted"})
+            await this.userService.updateActivity(activitId);
+            response.status(200).send({success:true,message:constants.FRND_REQUEST_ACCEPTED})
         } catch (error) {
             if(error instanceof HttpException) throw error
             throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
