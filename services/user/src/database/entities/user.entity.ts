@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn,Column, OneToMany, BeforeInsert, JoinTable, OneToOne, JoinColumn} from "typeorm";
+import { Entity, PrimaryGeneratedColumn,Column, OneToMany, BeforeInsert, OneToOne, JoinColumn} from "typeorm";
 import * as bcrypt from 'bcrypt'
 import UserActivity from "./userActivity.entity";
 import UserAssets from "./userAssets.entity";
@@ -21,8 +21,15 @@ export default class User{
       this.password = await bcrypt.hash(this.password, 10);
     }
 
-    @Column({type:'bigint'})
-    mobileNumber:number;
+    @Column()
+    mobileNumber:string;
+
+    @Column({nullable:true})
+    status:string;
+
+
+    @Column({default:false})
+    isDeleted:boolean;
     
     @OneToOne(()=> UserProfile, {cascade:true})
     @JoinColumn()

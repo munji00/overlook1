@@ -26,3 +26,13 @@ export const DATABASE_USERNAME = process.env.DB_USERNAME;
 export const DATABASE_PASSWORD = process.env.DB_PASSWORD;
 export const DATABASE_NAME = process.env.DB_NAME
 export const DATABASE_HOST = process.env.DB_HOST
+
+
+
+//Custom validation error messages
+export const PASSWORD_LENGTH_VALIDATION_ERROR = "Password must be at least 8 characters long";
+export const PASSWORD_PATTERN_VALIDATION_ERROR = "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character";
+export const MOB_NUM_LENGTH_VALIDATION_ERROR ="";
+export const MOB_NUM_PATTERN_VALIDATION_ERROR = "Mobile number must be a valid number";
+export const EMAIL_LENGTH_VALIDATION_ERROR ="";
+export const EMAIL_PATTERN_VALIDATION_ERROR = "";
