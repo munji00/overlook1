@@ -1,6 +1,6 @@
 
 export interface CreateUserI{
     userName:string;
-    mobileNumber:number;
+    mobileNumber:string;
     password:string;
 }
