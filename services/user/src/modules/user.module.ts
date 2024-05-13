@@ -7,6 +7,7 @@ import { ProfileRepoProvider } from '../providers/profileRepo.provider';
 import { AssetsRepoProvider } from '../providers/assetsRepo.provider';
 import { MulterMiddleware } from '../common/middlewares/multer.middleware';
 import { ActivityRepoProvider } from '../providers/activityRepo.provider';
+import { RabbitMQClient } from 'src/amqp/consumer';
 
 @Module({
   imports: [DatabaseModule],
@@ -16,7 +17,8 @@ import { ActivityRepoProvider } from '../providers/activityRepo.provider';
     ...ProfileRepoProvider,
     ...AssetsRepoProvider,
     ...ActivityRepoProvider,
-    UserService
+    UserService,
+    RabbitMQClient,
 ],
   exports:[
     ...UserRepoProvider,
